@@ -1,0 +1,83 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <form>
+        <!-- <label >Region name</label>
+        <input type="text" id="name"><br><br>
+        <label for="lname">Coordinates</label>
+        <input type='text' id="coordinates" ><br><br> -->
+        <input id='post' type="submit" value="Post">
+    </form>
+    <script>
+
+        let coordinates
+        let name 
+
+     
+        fetch('./data/guneydogu_anadolu.json')
+        .then(res => res.json())
+        .then(data => {
+            coordinates = data[0].geojson.coordinates
+            name = data[0].display_name
+        }).catch(err => console.log(err))
+
+        axios({
+            method: 'get',
+            url: 'http://127.0.0.1:8000/service/region/',
+          
+        })
+        .then(res => {
+            console.log(res.data)
+          
+        }) 
+        .catch(err => console.log(err))
+
+
+        document.getElementById('post').addEventListener('click', () =>{
+
+
+
+            for(let list1 of coordinates){
+
+                      
+             
+    
+
+                coordinates.forEach(list => {
+
+                    list.forEach(list2 => {
+                            
+                        axios({
+                        method: 'put',
+                        url: 'http://127.0.0.1:8000/service/region/',
+                        data: {
+                            name: name,
+                            coordinates: list2
+                            }
+                        })
+                        .then(res => res.json()).catch(err => console.log(err))
+                              
+                                    
+                    })
+                })
+
+            }
+
+                
+        })
+
+        console.log(coordinates)
+
+
+    
+    </script>
+
+
+</body>
+</html>
