@@ -12,10 +12,14 @@ from .models import (
 )
 
 class CoordinateSerializer(serializers.ModelSerializer):
-    latitude = serializers.FloatField()
-    longitude = serializers.FloatField()
+    # latitude = serializers.FloatField()
+    # longitude = serializers.FloatField()
     class Meta:
         model = Coordinate
+        fields = (
+            'latitude',
+            'longitude'
+        )
        
 
 
@@ -25,8 +29,9 @@ class RegionSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Region
         fields = (
+            'id',
             'name',
-            
+            'coordinate'
         )
        
 class CitySerializer(serializers.ModelSerializer):
