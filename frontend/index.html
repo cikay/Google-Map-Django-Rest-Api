@@ -12,19 +12,26 @@
         <input type="text" id="name"><br><br>
         <label for="lname">Coordinates</label>
         <input type='text' id="coordinates" ><br><br> -->
-        <input id='put' type="submit" value="put">
+        <input id='post' type="submit" value="put">
     </form>
     <script>
 
         let coordinates
         let id
+        let name 
+        let list_coordinate = []
 
      
-        fetch('./data/guneydogu_anadolu.json')
+        fetch('./data/gaziantep.json')
         .then(res => res.json())
         .then(data => {
             coordinates = data[0].geojson.coordinates
-            name = data[0].display_name
+            name = 'Gaziantep'
+
+            for(let list1 of coordinates[0]){
+
+                list_coordinate.push(list1)
+            }
             
 
         }).catch(err => console.log(err))
@@ -33,35 +40,21 @@
         .then(res => {
             console.log(res.data)
             id = res.data[0].id
+            console.log(`id: ${id}`)
           
         }) 
         .catch(err => console.log(err))
 
+        
+        document.getElementById('post').addEventListener('click', () =>{
 
-        document.getElementById('put').addEventListener('click', () =>{
-
-
-
-            for(let list1 of coordinates){
-
-                coordinates.forEach(list => {
-
-                    list.forEach(list2 => {
-                            
-                        axios.put(`http://127.0.0.1:8000/service/region/${id}/update/`, {latitude: list2[1], longitude: list2[0]})
-                        .then(res => res.json()).catch(err => console.log(err))
-                    
-                    })
-                })
-
-            }
-                
+            axios.post(`http://127.0.0.1:8000/service/city/detail/`, {polygon: list_coordinate, name: name, region_id: id})
+            .then(res => res.json()).catch(err => console.log(err))
         })
 
-        console.log(coordinates)
+        
 
 
-    
     </script>
 
 

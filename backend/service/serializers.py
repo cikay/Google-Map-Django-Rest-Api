@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from .models import (
     Coordinate,
+    Polygon,
     Region,
     City,
     Town,
@@ -12,8 +13,6 @@ from .models import (
 )
 
 class CoordinateSerializer(serializers.ModelSerializer):
-    # latitude = serializers.FloatField()
-    # longitude = serializers.FloatField()
     class Meta:
         model = Coordinate
         fields = (
@@ -22,6 +21,12 @@ class CoordinateSerializer(serializers.ModelSerializer):
         )
        
 
+class PolygonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Polygon
+        fields = (
+            'coordinate'
+        )
 
 class RegionSerializer(serializers.ModelSerializer):
     # coordinates = CoordinateSerializer(many=True)
@@ -31,7 +36,7 @@ class RegionSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
-            'coordinate'
+            'polygon'
         )
        
 class CitySerializer(serializers.ModelSerializer):
@@ -41,8 +46,8 @@ class CitySerializer(serializers.ModelSerializer):
         model = City
         fields = (
             'name', 
-            'coordinates',
-            'region'
+            'region',
+            'polygon'
         )
 
 class TownSerializer(serializers.ModelSerializer):

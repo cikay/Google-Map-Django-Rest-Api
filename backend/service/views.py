@@ -14,6 +14,7 @@ from rest_framework.response import Response
 
 from .models import (
     Coordinate,
+    Polygon,
     Region,
     City,
     Town,
@@ -24,6 +25,7 @@ from .models import (
 from rest_framework.views import APIView
 from .serializers import (
     CoordinateSerializer,
+    PolygonSerializer,
     RegionSerializer,
     CitySerializer,
     TownSerializer,
@@ -47,7 +49,7 @@ class RegionList(ListAPIView):
     permission_classes = (permissions.AllowAny, )
 
 
-class RegionUpdate(APIView):
+class RegionDetail(APIView):
  
     def put(self, request, pk):
         print(request.data)
@@ -62,5 +64,75 @@ class RegionUpdate(APIView):
             return Response(coor_serializer.data)
         return Response(coor_serializer.errors)
     
+    def post(self, request):
+        serializer = RegionSerializer(data={'name' : request.data.get('name')})
+        print(serializer)
+        coordinates = request.data.get('polygon')
+        # request.data['polygon'])
+        # region = Region()
+        print(f"serializer is valid: {serializer.is_valid()}")
+        polygon = Polygon.objects.none()
+        for coordinate in coordinates:
+            data = {
+                'latitude'  : coordinate[1],
+                'longitude' : coordinate[0],
+            }
+            form = CoordinateSerializer(data=data)
+            
+            print(f"form is valid: {form.is_valid()}")
+            if form.is_valid():
+                coor = form.save()
+                polygon = Polygon.objects.create()
+                polygon.coordinate.add(coor.id)
+                polygon.save()
+            else:
+                print(form.errors)
+
+        try:
+            serializer.save().polygon.add(polygon.id)
+           
+        except Polygon.DoesNotExist:
+            print('******************************')
+        
+        # if serializer.is_valid():
+        #     # region = serializer.save()
+        #     # print(f"region: {region}")
 
 
+        return Response(serializer.errors)
+
+    
+
+class CityDetail(APIView):
+
+
+    def post(self, request):
+        serializer = CitySerializer(data={'name' : request.data.get('name'), 'region': Region.objects.get(request.data['region_id'])})
+        coordinates = request.data.get('polygon')
+        print(f"city serializer is valid: {serializer.is_valid()}")
+        polygon = Polygon.objects.none()
+        print(f"coor: {coordinates}")
+        for coordinate in coordinates:
+            data = {
+                'latitude'  : coordinate[1],
+                'longitude' : coordinate[0],
+            }
+            form = CoordinateSerializer(data=data)
+            
+            print(f"form is valid: {form.is_valid()}")
+            if form.is_valid():
+                coor = form.save()
+                polygon = Polygon.objects.create()
+                polygon.coordinate.add(coor.id)
+                polygon.save()
+            else:
+                print(form.errors)
+
+        try:
+            serializer.save().polygon.add(polygon.id)
+            
+            
+        except Polygon.DoesNotExist:
+            print('******************************')
+        
+        return Response(serializer.errors)
