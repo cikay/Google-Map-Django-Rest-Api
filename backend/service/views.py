@@ -71,7 +71,7 @@ class RegionDetail(APIView):
         # request.data['polygon'])
         # region = Region()
         print(f"serializer is valid: {serializer.is_valid()}")
-        polygon = Polygon.objects.none()
+        polygon = Polygon.objects.create()
         for coordinate in coordinates:
             data = {
                 'latitude'  : coordinate[1],
@@ -82,11 +82,13 @@ class RegionDetail(APIView):
             print(f"form is valid: {form.is_valid()}")
             if form.is_valid():
                 coor = form.save()
-                polygon = Polygon.objects.create()
+                
                 polygon.coordinate.add(coor.id)
-                polygon.save()
+                
             else:
                 print(form.errors)
+
+        polygon.save()
 
         try:
             serializer.save().polygon.add(polygon.id)
@@ -102,37 +104,80 @@ class RegionDetail(APIView):
         return Response(serializer.errors)
 
     
-
 class CityDetail(APIView):
 
 
     def post(self, request):
-        serializer = CitySerializer(data={'name' : request.data.get('name'), 'region': Region.objects.get(request.data['region_id'])})
-        coordinates = request.data.get('polygon')
-        print(f"city serializer is valid: {serializer.is_valid()}")
-        polygon = Polygon.objects.none()
-        print(f"coor: {coordinates}")
-        for coordinate in coordinates:
-            data = {
-                'latitude'  : coordinate[1],
-                'longitude' : coordinate[0],
-            }
-            form = CoordinateSerializer(data=data)
-            
-            print(f"form is valid: {form.is_valid()}")
-            if form.is_valid():
-                coor = form.save()
-                polygon = Polygon.objects.create()
-                polygon.coordinate.add(coor.id)
-                polygon.save()
-            else:
-                print(form.errors)
-
+        polygon = create_polygon(request)
+        polygon.save()
+        region = Region.objects.get(id=request.data['region_id'])
+        print(f"city id: {request.data['city_id']}")
         try:
-            serializer.save().polygon.add(polygon.id)
-            
-            
-        except Polygon.DoesNotExist:
-            print('******************************')
+            city = City.objects.create(name=request.data.get('name'), region=region)
+            city.polygon.add(polygon.id)
+            print(f"city: {city}")
+        except Exception as e:
+            print(e)
+        return Response()
+
+
+class TownDetail(APIView):
+
+    def post(self, request):
+        polygon = create_polygon(request)
+        polygon.save()
+        city = City.objects.get(id=request.data['city_id'])
+        try:
+            town = Town.objects.create(name=request.data.get('name'), city=city)
+            town.polygon.add(polygon.id)
+            print(f"town: {town}")
+        except Exception as e:
+            print(e)
+        return Response()
+
+class DistrictDetail(APIView):
+
+    def post(self, request):
+        polygon = create_polygon(request)
+        polygon.save()
+        town = Town.objects.get(id=request.data['town_id'])
+        try:
+            district = District.objects.create(name=request.data.get('name'), town=town)
+            town.polygon.add(polygon.id)
+            print(f"district: {district}")
+        except Exception as e:
+            print(e)
+        return Response()
+
+class NeighborhoodDetail(APIView):
+
+    def post(self, request):
+        polygon = create_polygon(request)
+        polygon.save()
+        district = District.objects.get(id=request.data['district_id'])
+        try:
+            neighborhood = Neighborhood.objects.create(name=request.data.get('name'), district=district)
+            neighborhood.polygon.add(polygon.id)
+            print(f"neighborhood: {neighborhood}")
+        except Exception as e:
+            print(e)
+        return Response()
+
+def create_polygon(request) ->  Polygon: 
+
+    coordinates = request.data.get('polygon')
+    polygon = Polygon.objects.create()
+    for coordinate in coordinates:
+        data = {
+            'latitude'  : coordinate[1],
+            'longitude' : coordinate[0],
+        }
+        form = CoordinateSerializer(data=data)
         
-        return Response(serializer.errors)
+        if form.is_valid():
+            coor = form.save()
+            polygon.coordinate.add(coor.id)
+        else:
+            print(form.errors)
+    return polygon
+

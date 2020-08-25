@@ -41,7 +41,8 @@ class RegionSerializer(serializers.ModelSerializer):
        
 class CitySerializer(serializers.ModelSerializer):
     # coordinates = CoordinateSerializer(many=True)
-
+    polygon = PolygonSerializer(many=True)
+    
     class Meta: 
         model = City
         fields = (

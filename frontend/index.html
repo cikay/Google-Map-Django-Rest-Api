@@ -22,11 +22,11 @@
         let list_coordinate = []
 
      
-        fetch('./data/gaziantep.json')
+        fetch('./data/sehitkamil.json')
         .then(res => res.json())
         .then(data => {
             coordinates = data[0].geojson.coordinates
-            name = 'Gaziantep'
+            name = data[0].display_name
 
             for(let list1 of coordinates[0]){
 
@@ -36,22 +36,42 @@
 
         }).catch(err => console.log(err))
 
-        axios.get(`http://127.0.0.1:8000/service/region/`,)
-        .then(res => {
-            console.log(res.data)
-            id = res.data[0].id
-            console.log(`id: ${id}`)
+        //AD CITY
+
+        // axios.get(`http://127.0.0.1:8000/service/region/`,)
+        // .then(res => {
+        //     console.log(res.data)
+        //     id = res.data[0].id
+        //     console.log(`id: ${id}`)
           
-        }) 
-        .catch(err => console.log(err))
+        // }) 
+        // .catch(err => console.log(err))
+
+        
+        // document.getElementById('post').addEventListener('click', () =>{
+
+        //     axios.post(`http://127.0.0.1:8000/service/city/detail/`, {polygon: list_coordinate, name: name, region_id: id})
+        //     .then(res => res.json()).catch(err => console.log(err))
+        // })
+
+
+
+        //AD TOWN
+        // axios.get(`http://127.0.0.1:8000/service/city/`,)
+        // .then(res => {
+        //     console.log(res.data)
+        //     id = 1
+          
+        // }) 
+        // .catch(err => console.log(err))
 
         
         document.getElementById('post').addEventListener('click', () =>{
 
-            axios.post(`http://127.0.0.1:8000/service/city/detail/`, {polygon: list_coordinate, name: name, region_id: id})
+            axios.post(`http://127.0.0.1:8000/service/district/detail/`, {polygon: list_coordinate, name: name, town_id: 3})
             .then(res => res.json()).catch(err => console.log(err))
         })
-
+        
         
 
 
