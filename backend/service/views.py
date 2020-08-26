@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 import json
 from rest_framework.generics import (
     CreateAPIView,
@@ -17,7 +18,7 @@ from .models import (
     Polygon,
     Region,
     City,
-    Town,
+    County,
     District,
     Neighborhood
 )
@@ -28,7 +29,7 @@ from .serializers import (
     PolygonSerializer,
     RegionSerializer,
     CitySerializer,
-    TownSerializer,
+    CountySerializer,
     DistrictSerializer,
     NeighborhoodSerializer
 )
@@ -41,9 +42,12 @@ class NeighborhoodDetail(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors)
+    
+
 
 
 class RegionList(ListAPIView):
+
     queryset = Region.objects.all()
     serializer_class = RegionSerializer
     permission_classes = (permissions.AllowAny, )
@@ -53,12 +57,8 @@ class RegionDetail(APIView):
  
     def put(self, request, pk):
         print(request.data)
-        print(f"pk: {pk}")
         region = Region.objects.get(pk=pk)
-        print(f"region instance: {Region.objects.get(pk=pk)}")
         coor_serializer = CoordinateSerializer(instance=region, data=request.data)
-        print(f"coor_serializer: {coor_serializer}")
-        print(f"coor_serializer.is_valid() {coor_serializer.is_valid()}")
         if coor_serializer.is_valid():
             coor_serializer.save()
             return Response(coor_serializer.data)
@@ -84,11 +84,9 @@ class RegionDetail(APIView):
                 coor = form.save()
                 
                 polygon.coordinate.add(coor.id)
-                
+                polygon.save()
             else:
                 print(form.errors)
-
-        polygon.save()
 
         try:
             serializer.save().polygon.add(polygon.id)
@@ -96,22 +94,15 @@ class RegionDetail(APIView):
         except Polygon.DoesNotExist:
             print('******************************')
         
-        # if serializer.is_valid():
-        #     # region = serializer.save()
-        #     # print(f"region: {region}")
-
-
         return Response(serializer.errors)
-
+    
     
 class CityDetail(APIView):
-
 
     def post(self, request):
         polygon = create_polygon(request)
         polygon.save()
-        region = Region.objects.get(id=request.data['region_id'])
-        print(f"city id: {request.data['city_id']}")
+        region = Region.objects.get(id=request.data['related_model_id'])
         try:
             city = City.objects.create(name=request.data.get('name'), region=region)
             city.polygon.add(polygon.id)
@@ -121,14 +112,14 @@ class CityDetail(APIView):
         return Response()
 
 
-class TownDetail(APIView):
+class CountyDetail(APIView):
 
     def post(self, request):
         polygon = create_polygon(request)
         polygon.save()
-        city = City.objects.get(id=request.data['city_id'])
+        city = City.objects.get(id=request.data['related_model_id'])
         try:
-            town = Town.objects.create(name=request.data.get('name'), city=city)
+            town = County.objects.create(name=request.data.get('name'), city=city)
             town.polygon.add(polygon.id)
             print(f"town: {town}")
         except Exception as e:
@@ -140,7 +131,7 @@ class DistrictDetail(APIView):
     def post(self, request):
         polygon = create_polygon(request)
         polygon.save()
-        town = Town.objects.get(id=request.data['town_id'])
+        town = County.objects.get(id=request.data['related_model_id'])
         try:
             district = District.objects.create(name=request.data.get('name'), town=town)
             town.polygon.add(polygon.id)
@@ -154,7 +145,7 @@ class NeighborhoodDetail(APIView):
     def post(self, request):
         polygon = create_polygon(request)
         polygon.save()
-        district = District.objects.get(id=request.data['district_id'])
+        district = District.objects.get(id=request.data['related_model_id'])
         try:
             neighborhood = Neighborhood.objects.create(name=request.data.get('name'), district=district)
             neighborhood.polygon.add(polygon.id)

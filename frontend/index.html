@@ -1,18 +1,18 @@
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js'></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/is-glob@4.0.1/index.min.js"></script> -->
+   
+   
 </head>
 
 <body>
     <form>
-        <!-- <label >Region name</label>
-        <input type="text" id="name"><br><br>
-        <label for="lname">Coordinates</label>
-        <input type='text' id="coordinates" ><br><br> -->
-        <input id='post' type="submit" value="put">
+        
+        <button id='post'>Post</button>
     </form>
     <script>
 
@@ -20,59 +20,116 @@
         let id
         let name 
         let list_coordinate = []
+        let model
+        let related_model
+        let related_model_name
+        let related_model_id
 
-     
-        fetch('./data/sehitkamil.json')
-        .then(res => res.json())
-        .then(data => {
-            coordinates = data[0].geojson.coordinates
-            name = data[0].display_name
+        axios.get(`http://127.0.0.1:8000/service/region/`)
+        .then(res => {
+            console.log(res.data)
+        }) 
+        .catch(err => console.log(err))
 
-            for(let list1 of coordinates[0]){
+        
 
-                list_coordinate.push(list1)
-            }
+
+        document.getElementById('post').addEventListener('click', (e) =>{
+            e.preventDefault()
+
+            // var glob = require("glob");
+            // var fs = require("fs");
+
+            // glob("./data/*.json", (err, files) => { 
+            //     if(err) {
+            //         console.log("cannot read the folder, something goes wrong with glob", err);
+            //     }
+            //     var matters = [];
+            //     files.forEach((file) => {
+            //         fs.readFile(file, 'utf8', (err, data) => { // Read each file
+            //             if(err) {
+            //                 console.log("cannot read the file, something goes wrong with the file", err);
+            //             }
+            //             var parsedData = JSON.parse(data);
+
+            //             coordinates = parsedData[0].geojson.coordinates
+            //             name = parsedData[0].display_name
+            //             model = parsedData[0].model
+            //             related_model = parsedData[0].related_model
+            //             related_model_name = parsedData[0].related_model_name
+
+                        
+            //             for(let list1 of coordinates[0]){
+
+            //                 list_coordinate.push(list1)
+            //             }
+
+
+            //             axios.get(`http://127.0.0.1:8000/service/${related_model}/`)
+            //             .then(res => {
+            //                 console.log(res.data)
+            //                 for(let model of res.data){
+
+            //                     if(model.name == related_model_name){
+            //                         related_model_id = model.id
+            //                     }
+            //                 }
+                            
+            //             }) 
+            //             .catch(err => console.log(err))
+                    
+                        
+            //             axios.post(`http://127.0.0.1:8000/service/${model}/detail/`, {polygon: list_coordinate, name: name, related_model_id: id})
+            //             .then(res => res.json()).catch(err => console.log(err))
+
+
+            //         });
+            //     });
+            // });
             
 
-        }).catch(err => console.log(err))
+            // fetch('./data/gaziantep.json')
+            // .then(res => res.json())
+            // .then(data => {
+            //     coordinates = data[0].geojson.coordinates
+            //     name = data[0].display_name
+            //     model = data[0].model
+            //     related_model = data[0].related_model
+            //     related_model_name = data[0].related_model_name
 
-        //AD CITY
+                
+            //     for(let list1 of coordinates[0]){
 
-        // axios.get(`http://127.0.0.1:8000/service/region/`,)
-        // .then(res => {
-        //     console.log(res.data)
-        //     id = res.data[0].id
-        //     console.log(`id: ${id}`)
-          
-        // }) 
-        // .catch(err => console.log(err))
+            //         list_coordinate.push(list1)
+            //     }
 
+
+            //     axios.get(`http://127.0.0.1:8000/service/${related_model}/`)
+            //     .then(res => {
+            //         console.log(res.data)
+            //         for(let model of res.data){
+
+            //             if(model.name == related_model_name){
+            //                 related_model_id = model.id
+            //             }
+            //         }
+                    
+            //     }) 
+            //     .catch(err => console.log(err))
+            
+
+                
+            //     // axios.post(`http://127.0.0.1:8000/service/${model}/detail/`, {polygon: list_coordinate, name: name, related_model_id: id})
+            //     // .then(res => res.json()).catch(err => console.log(err))
+
+                
+            // }).catch(err => console.log(err))
         
-        // document.getElementById('post').addEventListener('click', () =>{
 
-        //     axios.post(`http://127.0.0.1:8000/service/city/detail/`, {polygon: list_coordinate, name: name, region_id: id})
-        //     .then(res => res.json()).catch(err => console.log(err))
-        // })
-
-
-
-        //AD TOWN
-        // axios.get(`http://127.0.0.1:8000/service/city/`,)
-        // .then(res => {
-        //     console.log(res.data)
-        //     id = 1
-          
-        // }) 
-        // .catch(err => console.log(err))
-
-        
-        document.getElementById('post').addEventListener('click', () =>{
-
-            axios.post(`http://127.0.0.1:8000/service/district/detail/`, {polygon: list_coordinate, name: name, town_id: 3})
-            .then(res => res.json()).catch(err => console.log(err))
+           
         })
-        
-        
+
+       
 
 
     </script>

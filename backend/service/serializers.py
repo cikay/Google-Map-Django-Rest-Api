@@ -7,7 +7,7 @@ from .models import (
     Polygon,
     Region,
     City,
-    Town,
+    County,
     District,
     Neighborhood
 )
@@ -41,7 +41,7 @@ class RegionSerializer(serializers.ModelSerializer):
        
 class CitySerializer(serializers.ModelSerializer):
     # coordinates = CoordinateSerializer(many=True)
-    polygon = PolygonSerializer(many=True)
+    # polygon = PolygonSerializer(many=True)
     
     class Meta: 
         model = City
@@ -51,11 +51,11 @@ class CitySerializer(serializers.ModelSerializer):
             'polygon'
         )
 
-class TownSerializer(serializers.ModelSerializer):
+class CountySerializer(serializers.ModelSerializer):
     # coordinates = CoordinateSerializer(many=True)
 
     class Meta: 
-        model = Town
+        model = County
         fields = (
             'name', 
             'coordinates',
@@ -70,7 +70,7 @@ class DistrictSerializer(serializers.ModelSerializer):
         fields = (
             'name', 
             'coordinates',
-            'town'
+            'county'
         )
 
 class NeighborhoodSerializer(serializers.ModelSerializer):
