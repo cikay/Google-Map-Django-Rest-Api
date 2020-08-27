@@ -25,67 +25,65 @@
         let related_model_name
         let related_model_id
 
-        axios.get(`http://127.0.0.1:8000/service/region/`)
-        .then(res => {
-            console.log(res.data)
-        }) 
-        .catch(err => console.log(err))
-
+        // axios.get(`http://127.0.0.1:8000/service/region/`)
+        // .then(res => {
+        //     console.log(res.data)
+        // }) 
+        // .catch(err => console.log(err))
         
-
 
         document.getElementById('post').addEventListener('click', (e) =>{
             e.preventDefault()
 
-            // var glob = require("glob");
-            // var fs = require("fs");
+            var glob = require("glob");
+            var fs = require("fs");
 
-            // glob("./data/*.json", (err, files) => { 
-            //     if(err) {
-            //         console.log("cannot read the folder, something goes wrong with glob", err);
-            //     }
-            //     var matters = [];
-            //     files.forEach((file) => {
-            //         fs.readFile(file, 'utf8', (err, data) => { // Read each file
-            //             if(err) {
-            //                 console.log("cannot read the file, something goes wrong with the file", err);
-            //             }
-            //             var parsedData = JSON.parse(data);
+            glob("./data/*.json", (err, files) => { 
+                if(err) {
+                    console.log("cannot read the folder, something goes wrong with glob", err);
+                }
+                var matters = [];
+                files.forEach((file) => {
+                    fs.readFile(file, 'utf8', (err, data) => { // Read each file
+                        if(err) {
+                            console.log("cannot read the file, something goes wrong with the file", err);
+                        }
+                        var parsedData = JSON.parse(data);
 
-            //             coordinates = parsedData[0].geojson.coordinates
-            //             name = parsedData[0].display_name
-            //             model = parsedData[0].model
-            //             related_model = parsedData[0].related_model
-            //             related_model_name = parsedData[0].related_model_name
+                        coordinates = parsedData[0].geojson.coordinates
+                        name = parsedData[0].display_name
+                        model = parsedData[0].model
+                        related_model = parsedData[0].related_model
+                        related_model_name = parsedData[0].related_model_name
 
                         
-            //             for(let list1 of coordinates[0]){
+                        for(let list1 of coordinates[0]){
 
-            //                 list_coordinate.push(list1)
-            //             }
+                            list_coordinate.push(list1)
+                        }
 
 
-            //             axios.get(`http://127.0.0.1:8000/service/${related_model}/`)
-            //             .then(res => {
-            //                 console.log(res.data)
-            //                 for(let model of res.data){
+                        axios.get(`http://127.0.0.1:8000/service/${related_model}/`)
+                        .then(res => {
+                            console.log(res.data)
+                            for(let model of res.data){
 
-            //                     if(model.name == related_model_name){
-            //                         related_model_id = model.id
-            //                     }
-            //                 }
+                                if(model.name == related_model_name){
+                                    related_model_id = model.id
+                                }
+                            }
                             
-            //             }) 
-            //             .catch(err => console.log(err))
+                        }) 
+                        .catch(err => console.log(err))
                     
                         
-            //             axios.post(`http://127.0.0.1:8000/service/${model}/detail/`, {polygon: list_coordinate, name: name, related_model_id: id})
-            //             .then(res => res.json()).catch(err => console.log(err))
+                        axios.post(`http://127.0.0.1:8000/service/${model}/detail/`, {polygon: list_coordinate, name: name, related_model_id: id})
+                        .then(res => res.json()).catch(err => console.log(err))
 
 
-            //         });
-            //     });
-            // });
+                    });
+                });
+            });
             
 
             // fetch('./data/gaziantep.json')
