@@ -3,5 +3,5 @@ frontend/data
 frontend/node_modules/
 .bashrc
 package-lock.json
-
+backend/db.sqlite3
 

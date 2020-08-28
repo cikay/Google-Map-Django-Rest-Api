@@ -5,7 +5,7 @@ class Coordinate(models.Model):
     longitude = models.FloatField()
 
 class Polygon(models.Model):
-    coordinate = models.ForeignKey(Coordinate, on_delete=models.CASCADE)
+    coordinate = models.ManyToManyField(Coordinate, blank=True)
 
 # class AbstractArea(models.Model):
 #     name = models.CharField(max_length=50)
@@ -21,15 +21,13 @@ class Polygon(models.Model):
 
 class Region(models.Model):
     name    = models.CharField(max_length=50)
-    polygon = models.ForeignKey(Polygon,  on_delete=models.CASCADE)
-    
-    class Meta:
-        db_table = 'region'
+    polygon = models.ForeignKey(Polygon, on_delete=models.CASCADE)
+ 
 
 class City(models.Model):
     name    = models.CharField(max_length=50)
     polygon = models.ForeignKey(Polygon,  on_delete=models.CASCADE)
-    region  = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='region', blank=True)
+    region  = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='region')
 
 class County(models.Model):
     name    = models.CharField(max_length=50)
