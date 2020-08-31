@@ -14,7 +14,7 @@ var fs = require("fs");
 var axios = require('axios')
 
 
-glob("./data/regions/*.json", (err, files) => { 
+glob("./data/counties/*.json", (err, files) => { 
     if(err) {
         console.log("cannot read the folder, something goes wrong with glob", err);
     }
@@ -43,22 +43,30 @@ glob("./data/regions/*.json", (err, files) => {
             if(model != 'region'){
                 axios.get(`http://127.0.0.1:8000/service/${related_model}/`)
                 .then(res => {
-                    // console.log(res.data)
+                    console.log(`related_model_name ${related_model_name}`)
                     for(let model of res.data){
-
                         if(model.name == related_model_name){
                             related_model_id = model.id
+                            console.log(model)
+                            console.log(`related_model_id: ${related_model_id}`)
                         }
                     }
+
+                    console.log(`related model id: ${related_model_id}`)
+                    axios.post(`http://127.0.0.1:8000/service/${model}/detail/`, {polygon: list_coordinate, name: name, related_model_id: related_model_id})
+                    .then(res => {}).catch(err => console.log(err))
                     
                 }) 
                 .catch(err => console.log(err))
 
             }
+            else {
+                axios.post(`http://127.0.0.1:8000/service/${model}/detail/`, {polygon: list_coordinate, name: name})
+                .then(res => console.log(res)).catch(err => console.log(err))
 
-            axios.post(`http://127.0.0.1:8000/service/${model}/detail/`, {polygon: list_coordinate, name: name, related_model_id: id})
-            .then(res => res.json()).catch(err => console.log(err))
+            }
 
+        
         });
     });
 });

@@ -16,20 +16,23 @@ class CoordinateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coordinate
         fields = (
+            'id',
             'latitude',
             'longitude'
         )
        
 
 class PolygonSerializer(serializers.ModelSerializer):
+    coordinate = CoordinateSerializer(many=True)
     class Meta:
         model = Polygon
         fields = (
+            'id',
             'coordinate'
         )
 
 class RegionSerializer(serializers.ModelSerializer):
-
+    polygon = PolygonSerializer()
     class Meta: 
         model = Region
         fields = (
@@ -37,13 +40,15 @@ class RegionSerializer(serializers.ModelSerializer):
             'name',
             'polygon'
         )
-       
+
 class CitySerializer(serializers.ModelSerializer):
-   
+    polygon = PolygonSerializer(many=True)
+
     class Meta: 
         model = City
         fields = (
-            'name', 
+            'id',
+            'name',
             'region',
             'polygon'
         )
@@ -53,8 +58,9 @@ class CountySerializer(serializers.ModelSerializer):
     class Meta: 
         model = County
         fields = (
-            'name', 
-            'coordinates',
+            'id',
+            'name',
+            'polygon',
             'city'
         )
 
@@ -63,9 +69,10 @@ class DistrictSerializer(serializers.ModelSerializer):
     class Meta: 
         model = District
         fields = (
+            'id',
             'name', 
-            'coordinates',
-            'county'
+            'county',
+            'polygon'
         )
 
 class NeighborhoodSerializer(serializers.ModelSerializer):
@@ -73,7 +80,8 @@ class NeighborhoodSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Neighborhood
         fields = (
-            'name', 
-            'coordinates',
+            'id',
+            'name',
+            'polygon',
             'district'
         )

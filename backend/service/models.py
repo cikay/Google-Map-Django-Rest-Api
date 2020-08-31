@@ -7,6 +7,7 @@ class Coordinate(models.Model):
 class Polygon(models.Model):
     coordinate = models.ManyToManyField(Coordinate, blank=True)
 
+    
 # class AbstractArea(models.Model):
 #     name = models.CharField(max_length=50)
 #     polygon = models.ForeignKey(Polygon,  on_delete=models.CASCADE)
@@ -20,29 +21,29 @@ class Polygon(models.Model):
 
 
 class Region(models.Model):
-    name    = models.CharField(max_length=50)
-    polygon = models.ForeignKey(Polygon, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
+    polygon = models.ManyToManyField(Polygon, blank=True)
  
 
 class City(models.Model):
-    name    = models.CharField(max_length=50)
-    polygon = models.ForeignKey(Polygon,  on_delete=models.CASCADE)
-    region  = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='region')
+    name = models.CharField(max_length=50)
+    polygon = models.ManyToManyField(Polygon, blank=True)
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, null=True)
 
 class County(models.Model):
-    name    = models.CharField(max_length=50)
-    polygon = models.ForeignKey(Polygon,  on_delete=models.CASCADE)
-    city    = models.ForeignKey(City, on_delete=models.CASCADE, related_name='city')
+    name  = models.CharField(max_length=50)
+    polygon = models.ManyToManyField(Polygon, blank=True)
+    city = models.ForeignKey(City, on_delete=models.CASCADE, null=True)
 
 class District(models.Model):
-    name    = models.CharField(max_length=50)
-    polygon = models.ForeignKey(Polygon,  on_delete=models.CASCADE)
-    town    = models.ForeignKey(County, on_delete=models.CASCADE, related_name='county')
+    name = models.CharField(max_length=50)
+    polygon = models.ManyToManyField(Polygon, blank=True)
+    county = models.ForeignKey(County, on_delete=models.CASCADE, null=True)
 
 class Neighborhood(models.Model):
-    name        = models.CharField(max_length=50)
-    polygon     = models.ForeignKey(Polygon,  on_delete=models.CASCADE)
-    district    = models.ForeignKey(District, on_delete=models.CASCADE, related_name='district')
+    name = models.CharField(max_length=50)
+    polygon = models.ManyToManyField(Polygon, blank=True)
+    district = models.ForeignKey(District, on_delete=models.CASCADE, null=True)
 
 
 
