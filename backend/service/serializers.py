@@ -32,7 +32,7 @@ class PolygonSerializer(serializers.ModelSerializer):
         )
 
 class RegionSerializer(serializers.ModelSerializer):
-    polygon = PolygonSerializer()
+    polygon = PolygonSerializer(many=True)
     class Meta: 
         model = Region
         fields = (

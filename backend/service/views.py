@@ -37,6 +37,7 @@ from .serializers import (
 
 
 class RegionList(ListAPIView):
+    print('regions getting')
     queryset = Region.objects.all()
     serializer_class = RegionSerializer
     permission_classes = (permissions.AllowAny, )
@@ -55,9 +56,12 @@ class RegionDetail(APIView):
         return Response(coor_serializer.errors)
     
     def post(self, request):
-
-      
+        name = request.data.get('name')
+        exist = Region.objects.filter(name=name).exists()
+        print(f"exist: {exist}")
+        if exist: return Response()
         try:
+           
             region = Region.objects.create(name=request.data.get('name'))
             coordinates = request.data.get('polygon')
         
@@ -89,9 +93,13 @@ class CityList(ListAPIView):
 class CityDetail(APIView):
 
     def post(self, request):
-        region = Region.objects.get(id=request.data['related_model_id'])
+        name = request.data.get('name')
+        exist = City.objects.filter(name=name).exists()
+        print(f"exist: {exist}")
+        if exist: return Response()
+        region = Region.objects.get(name=request.data['related_model_name'])
         try:
-            city = City.objects.create(name=request.data.get('name'), region=region)
+            city = City.objects.create(name=name, region=region)
             coordinates = request.data.get('polygon')
             for coordinate in coordinates:
                 polygon = Polygon.objects.create()
@@ -106,13 +114,14 @@ class CityDetail(APIView):
                     city.polygon.add(polygon.id)
                 else:
                     print(form.errors)
-            print("region kaydedildi")
+            print("city kaydedildi")
         except Exception as e:
             print(e)
         return Response()
     
 
     def get(self, request, *args, **kwargs):
+        print('cities getting')
         related_model_id = kwargs['related_model_id']
         cities = City.objects.filter(region_id=related_model_id)
         serializer = CitySerializer(cities, many=True)
@@ -127,11 +136,27 @@ class CountyList(ListAPIView):
 class CountyDetail(APIView):
 
     def post(self, request):
-        polygon = create_polygon(request)
-        city = City.objects.get(id=request.data['related_model_id'])
+        name = request.data.get('name')
+        exist = County.objects.filter(name=name).exists()
+        print(f"exist: {exist}")
+        if exist: return Response()
+        city = City.objects.get(name=request.data['related_model_name'])
         try:
-            county = County.objects.create(name=request.data.get('name'), polygon=polygon, city=city)
-            print(f"county: {county}")
+            county = County.objects.create(name=name, city=city)
+            coordinates = request.data.get('polygon')
+            for coordinate in coordinates:
+                polygon = Polygon.objects.create()
+                data = {
+                    'latitude'  : coordinate[1],
+                    'longitude' : coordinate[0],
+                }
+                form = CoordinateSerializer(data=data)
+                if form.is_valid():
+                    coor = form.save()
+                    polygon.coordinate.add(coor.id)
+                    county.polygon.add(polygon.id)
+                else:
+                    print(form.errors)
         except Exception as e:
             print(e)
         return Response()
@@ -156,10 +181,13 @@ class DistrictList(ListAPIView):
 class DistrictDetail(APIView):
 
     def post(self, request):
-        
-        county = County.objects.get(id=request.data['related_model_id'])
+        name = request.data.get('name')
+        exist = District.objects.filter(name=name).exists()
+        print(f"exist: {exist}")
+        if exist: return Response()
+        county = County.objects.get(id=request.data['related_model_name'])
         try:
-            district = District.objects.create(name=request.data.get('name'), county=county)
+            district = District.objects.create(name=name, county=county)
             create_polygon(request, district)
             print(f"district: {district}")
         except Exception as e:

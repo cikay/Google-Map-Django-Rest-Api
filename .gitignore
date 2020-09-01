@@ -1,5 +1,6 @@
 env/
 frontend/data
+frontend/all\ regions/
 frontend/node_modules/
 .bashrc
 package-lock.json
