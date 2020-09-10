@@ -19,18 +19,18 @@ from .models import (
     Region,
     City,
     County,
-    District,
+    # District,
     Neighborhood
 )
 
 from rest_framework.views import APIView
 from .serializers import (
     CoordinateSerializer,
-    PolygonSerializer,
+    # PolygonSerializer,
     RegionSerializer,
     CitySerializer,
     CountySerializer,
-    DistrictSerializer,
+    # DistrictSerializer,
     NeighborhoodSerializer
 )
 
@@ -39,7 +39,9 @@ from .serializers import (
 class RegionList(ListAPIView):
     print('regions getting')
     queryset = Region.objects.all()
+   
     serializer_class = RegionSerializer
+  
     permission_classes = (permissions.AllowAny, )
 
 
@@ -66,16 +68,14 @@ class RegionDetail(APIView):
             coordinates = request.data.get('polygon')
         
             for coordinate in coordinates:
-                polygon = Polygon.objects.create()
                 data = {
-                    'latitude'  : coordinate[1],
-                    'longitude' : coordinate[0],
+                    'lat'  : coordinate[1],
+                    'lng' : coordinate[0],
                 }
                 form = CoordinateSerializer(data=data)
                 if form.is_valid():
                     coor = form.save()
-                    polygon.coordinate.add(coor.id)
-                    region.polygon.add(polygon.id)
+                    region.coordinates.add(coor.id)
                 else:
                     print(form.errors)
             print("region kaydedildi")
@@ -83,7 +83,9 @@ class RegionDetail(APIView):
             print('hata olustu, region kaydedilemedi')
         return Response()
     
-   
+    def get(self, request):
+        serializer = RegionSerializer.objects.get('Doğu Anadolu Bölgesi, Türkiye')
+
 
 class CityList(ListAPIView):
     queryset = City.objects.all()
@@ -104,14 +106,13 @@ class CityDetail(APIView):
             for coordinate in coordinates:
                 polygon = Polygon.objects.create()
                 data = {
-                    'latitude'  : coordinate[1],
-                    'longitude' : coordinate[0],
+                    'lat'  : coordinate[1],
+                    'lng' : coordinate[0],
                 }
                 form = CoordinateSerializer(data=data)
                 if form.is_valid():
                     coor = form.save()
-                    polygon.coordinate.add(coor.id)
-                    city.polygon.add(polygon.id)
+                    city.coordinates.add(coor.id)
                 else:
                     print(form.errors)
             print("city kaydedildi")
@@ -125,6 +126,8 @@ class CityDetail(APIView):
         related_model_id = kwargs['related_model_id']
         cities = City.objects.filter(region_id=related_model_id)
         serializer = CitySerializer(cities, many=True)
+        # print(serializer)
+        # print(serializer)
         return Response(serializer.data)
         
 
@@ -147,14 +150,13 @@ class CountyDetail(APIView):
             for coordinate in coordinates:
                 polygon = Polygon.objects.create()
                 data = {
-                    'latitude'  : coordinate[1],
-                    'longitude' : coordinate[0],
+                    'lat'  : coordinate[1],
+                    'lng' : coordinate[0],
                 }
                 form = CoordinateSerializer(data=data)
                 if form.is_valid():
                     coor = form.save()
-                    polygon.coordinate.add(coor.id)
-                    county.polygon.add(polygon.id)
+                    county.coordinate.add(coor.id)
                 else:
                     print(form.errors)
         except Exception as e:
@@ -171,38 +173,6 @@ class CountyDetail(APIView):
 
 
 
-
-
-class DistrictList(ListAPIView):
-    queryset = District.objects.all()
-    serializer_class = DistrictSerializer
-    permission_classes = (permissions.AllowAny, )
-
-class DistrictDetail(APIView):
-
-    def post(self, request):
-        name = request.data.get('name')
-        exist = District.objects.filter(name=name).exists()
-        print(f"exist: {exist}")
-        if exist: return Response()
-        county = County.objects.get(id=request.data['related_model_name'])
-        try:
-            district = District.objects.create(name=name, county=county)
-            create_polygon(request, district)
-            print(f"district: {district}")
-        except Exception as e:
-            print(e)
-        return Response()
-
-    def get(self, request, *args, **kwargs):
-        related_model_id = kwargs['related_model_id']
-        districts = District.objects.filter(region_id=related_model_id)
-        serializer = DistrictSerializer(districts, many=True)
-        return Response(serializer.data)
-
-    
-
-
 class NeighborhoodList(ListAPIView):
     queryset = Neighborhood.objects.all()
     serializer_class = NeighborhoodSerializer
@@ -211,43 +181,31 @@ class NeighborhoodList(ListAPIView):
 class NeighborhoodDetail(APIView):
 
     def post(self, request):
-        polygon = create_polygon(request)
-        district = District.objects.get(id=request.data['related_model_id'])
+        county = County.objects.get(name=request.data['related_model_name'])
         try:
-            neighborhood = Neighborhood.objects.create(name=request.data.get('name'), polygon=polygon, district=district)
-            print(f"neighborhood: {neighborhood}")
+            neighborhood = Neighborhood.objects.create(name=request.data.get('name'), county=county)
+            coordinates = request.data.get('polygon')
+            for coordinate in coordinates:
+                polygon = Polygon.objects.create()
+                data = {
+                    'lat'  : coordinate[1],
+                    'lng' : coordinate[0],
+                }
+                form = CoordinateSerializer(data=data)
+                if form.is_valid():
+                    coor = form.save()
+                    county.coordinate.add(coor.id)
+                else:
+                    print(form.errors)
         except Exception as e:
             print(e)
         return Response()
     
     def get(self, request, *args, **kwargs):
         related_model_id = kwargs['related_model_id']
-        districts = District.objects.filter(region_id=related_model_id)
-        serializer = DistrictSerializer(districts, many=True)
+        counties = County.objects.filter(region_id=related_model_id)
+        serializer = CountySerializer(counties, many=True)
         return Response(serializer.data)
 
 
-def create_polygon(request, model): 
-
-    coordinates = request.data.get('polygon')
-    polygon = Polygon.objects.create()
-    
-    for coordinate in coordinates:
-        data = {
-            'latitude'  : coordinate[1],
-            'longitude' : coordinate[0],
-        }
-        form = CoordinateSerializer(data=data)
-        if form.is_valid():
-            coor = form.save()
-            print(f"coordinate: {coor}")
-            polygon.coordinate.add(coor.id)
-            polygon.save()
-            print(f"model: {model}")
-            print(f"model.polygon: {model.polygon}")
-            model.polygon.add(polygon.id)
-        else:
-            print(form.errors)
-    # print(polygon)
-    # return polygon
 

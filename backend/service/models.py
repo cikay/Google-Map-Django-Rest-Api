@@ -1,8 +1,8 @@
 from django.db import models
 
 class Coordinate(models.Model):
-    latitude = models.FloatField()
-    longitude = models.FloatField()
+    lat = models.FloatField()
+    lng = models.FloatField()
 
 class Polygon(models.Model):
     coordinate = models.ManyToManyField(Coordinate, blank=True)
@@ -22,28 +22,28 @@ class Polygon(models.Model):
 
 class Region(models.Model):
     name = models.CharField(max_length=50)
-    polygon = models.ManyToManyField(Polygon, blank=True)
+    coordinates = models.ManyToManyField(Coordinate, blank=True)
+    # model = models.CharField(default='region')
  
 
 class City(models.Model):
     name = models.CharField(max_length=50)
-    polygon = models.ManyToManyField(Polygon, blank=True)
+    coordinates = models.ManyToManyField(Coordinate, blank=True)
     region = models.ForeignKey(Region, on_delete=models.CASCADE, null=True)
 
 class County(models.Model):
     name  = models.CharField(max_length=50)
-    polygon = models.ManyToManyField(Polygon, blank=True)
+    coordinates = models.ManyToManyField(Coordinate, blank=True)
     city = models.ForeignKey(City, on_delete=models.CASCADE, null=True)
 
-class District(models.Model):
-    name = models.CharField(max_length=50)
-    polygon = models.ManyToManyField(Polygon, blank=True)
-    county = models.ForeignKey(County, on_delete=models.CASCADE, null=True)
+# class District(models.Model):
+#     name = models.CharField(max_length=50)
+#     coordinates = models.ManyToManyField(Coordinate, blank=True)
+#     county = models.ForeignKey(County, on_delete=models.CASCADE, null=True)
 
 class Neighborhood(models.Model):
     name = models.CharField(max_length=50)
-    polygon = models.ManyToManyField(Polygon, blank=True)
-    district = models.ForeignKey(District, on_delete=models.CASCADE, null=True)
-
+    coordinates = models.ManyToManyField(Coordinate, blank=True)
+    county = models.ForeignKey(County, on_delete=models.CASCADE, null=True)
 
 

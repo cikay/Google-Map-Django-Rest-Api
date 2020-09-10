@@ -7,8 +7,8 @@ from .views import (
     CityDetail,
     CountyDetail,
     CountyList,
-    DistrictList,
-    DistrictDetail,
+    # DistrictList,
+    # DistrictDetail,
     NeighborhoodList,
     NeighborhoodDetail,
 
@@ -23,8 +23,8 @@ urlpatterns = [
     path('county/', CountyList.as_view()),
     path('county/detail/', CountyDetail.as_view()),
     path('county/<related_model_id>/', CountyDetail.as_view()),
-    path('district/', DistrictList.as_view()),
-    path('district/detail/', DistrictDetail.as_view()),
+    # path('district/', DistrictList.as_view()),
+    # path('district/detail/', DistrictDetail.as_view()),
     path('neighborhood/', NeighborhoodList.as_view()),
     path('neighborhood/detail/', NeighborhoodDetail.as_view()),
 

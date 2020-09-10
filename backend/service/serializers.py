@@ -8,7 +8,7 @@ from .models import (
     Region,
     City,
     County,
-    District,
+    # District,
     Neighborhood
 )
 
@@ -16,72 +16,81 @@ class CoordinateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coordinate
         fields = (
-            'id',
-            'latitude',
-            'longitude'
+            'lat',
+            'lng'
         )
        
-
-class PolygonSerializer(serializers.ModelSerializer):
-    coordinate = CoordinateSerializer(many=True)
-    class Meta:
-        model = Polygon
-        fields = (
-            'id',
-            'coordinate'
-        )
-
 class RegionSerializer(serializers.ModelSerializer):
-    polygon = PolygonSerializer(many=True)
+    coordinates = CoordinateSerializer(many=True)
+    model = serializers.SerializerMethodField()
     class Meta: 
         model = Region
         fields = (
             'id',
+            'model',
             'name',
-            'polygon'
+            'coordinates'
         )
+    
+    def get_model(self, instance):
+        try:
+            return instance.__class__.__name__
+        except:
+            return None
 
 class CitySerializer(serializers.ModelSerializer):
-    polygon = PolygonSerializer(many=True)
-
+    coordinates = CoordinateSerializer(many=True)
+    model = serializers.SerializerMethodField()
     class Meta: 
         model = City
         fields = (
             'id',
+            'model',
             'name',
             'region',
-            'polygon'
+            'coordinates'
         )
 
+    def get_model(self, instance):
+        try:
+            return instance.__class__.__name__
+        except:
+            return None
+
+
 class CountySerializer(serializers.ModelSerializer):
-   
+    model = serializers.SerializerMethodField()
     class Meta: 
         model = County
         fields = (
             'id',
+            'model',
             'name',
-            'polygon',
+            'coordinates',
             'city'
         )
 
-class DistrictSerializer(serializers.ModelSerializer):
-  
-    class Meta: 
-        model = District
-        fields = (
-            'id',
-            'name', 
-            'county',
-            'polygon'
-        )
+    def get_model(self, instance):
+        try:
+            return instance.__class__.__name__
+        except:
+            return None
+
 
 class NeighborhoodSerializer(serializers.ModelSerializer):
-    
+    model = serializers.SerializerMethodField()
     class Meta: 
         model = Neighborhood
         fields = (
             'id',
+            'model',
             'name',
-            'polygon',
-            'district'
+            'coordinates'
+            'county'
         )
+
+    def get_model(self, instance):
+        try:
+            return instance.__class__.__name__
+        except:
+            return None
