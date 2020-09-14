@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 import json
+from django.http import Http404
+from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
@@ -15,7 +17,6 @@ from rest_framework.response import Response
 
 from .models import (
     Coordinate,
-    Polygon,
     Region,
     City,
     County,
@@ -41,7 +42,6 @@ class RegionList(ListAPIView):
     queryset = Region.objects.all()
    
     serializer_class = RegionSerializer
-  
     permission_classes = (permissions.AllowAny, )
 
 
@@ -62,11 +62,10 @@ class RegionDetail(APIView):
         exist = Region.objects.filter(name=name).exists()
         print(f"exist: {exist}")
         if exist: return Response()
-        try:
-           
+        try: 
+
             region = Region.objects.create(name=request.data.get('name'))
             coordinates = request.data.get('polygon')
-        
             for coordinate in coordinates:
                 data = {
                     'lat'  : coordinate[1],
@@ -79,12 +78,27 @@ class RegionDetail(APIView):
                 else:
                     print(form.errors)
             print("region kaydedildi")
-        except Polygon.DoesNotExist:
-            print('hata olustu, region kaydedilemedi')
+        except Exception as e:
+            print(e)
         return Response()
     
     def get(self, request):
-        serializer = RegionSerializer.objects.get('Doğu Anadolu Bölgesi, Türkiye')
+        region = Region.objects.filter(id=2)
+        serializer = RegionSerializer(region, many=True)
+        return Response(serializer.data)
+    
+    def delete(self, request, pk):
+        print('region deleting')
+        region = self.get_object(pk=pk)
+        print(region.coordinates)
+        region.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_object(self, pk):
+        try: 
+            return Region.objects.get(pk=pk)
+        except Region.DoesNotExist:
+            raise Http404
 
 
 class CityList(ListAPIView):
@@ -104,7 +118,6 @@ class CityDetail(APIView):
             city = City.objects.create(name=name, region=region)
             coordinates = request.data.get('polygon')
             for coordinate in coordinates:
-                polygon = Polygon.objects.create()
                 data = {
                     'lat'  : coordinate[1],
                     'lng' : coordinate[0],
@@ -148,7 +161,6 @@ class CountyDetail(APIView):
             county = County.objects.create(name=name, city=city)
             coordinates = request.data.get('polygon')
             for coordinate in coordinates:
-                polygon = Polygon.objects.create()
                 data = {
                     'lat'  : coordinate[1],
                     'lng' : coordinate[0],
@@ -156,7 +168,7 @@ class CountyDetail(APIView):
                 form = CoordinateSerializer(data=data)
                 if form.is_valid():
                     coor = form.save()
-                    county.coordinate.add(coor.id)
+                    county.coordinates.add(coor.id)
                 else:
                     print(form.errors)
         except Exception as e:
@@ -166,9 +178,7 @@ class CountyDetail(APIView):
     def get(self, request, *args, **kwargs):
         related_model_id = kwargs['related_model_id']
         counties = County.objects.filter(city_id=related_model_id)
-        print(counties)
         serializer = CountySerializer(counties, many=True)
-        print(serializer.data)
         return Response(serializer.data)
 
 
@@ -186,7 +196,6 @@ class NeighborhoodDetail(APIView):
             neighborhood = Neighborhood.objects.create(name=request.data.get('name'), county=county)
             coordinates = request.data.get('polygon')
             for coordinate in coordinates:
-                polygon = Polygon.objects.create()
                 data = {
                     'lat'  : coordinate[1],
                     'lng' : coordinate[0],
@@ -194,7 +203,7 @@ class NeighborhoodDetail(APIView):
                 form = CoordinateSerializer(data=data)
                 if form.is_valid():
                     coor = form.save()
-                    county.coordinate.add(coor.id)
+                    neighborhood.coordinates.add(coor.id)
                 else:
                     print(form.errors)
         except Exception as e:
@@ -203,8 +212,8 @@ class NeighborhoodDetail(APIView):
     
     def get(self, request, *args, **kwargs):
         related_model_id = kwargs['related_model_id']
-        counties = County.objects.filter(region_id=related_model_id)
-        serializer = CountySerializer(counties, many=True)
+        neighborhoods = Neighborhood.objects.filter(county_id=related_model_id)
+        serializer = NeighborhoodSerializer(neighborhoods, many=True)
         return Response(serializer.data)
 
 

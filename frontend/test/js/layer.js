@@ -189,11 +189,13 @@ function drawPolygons(prevClickedPolygon=null, model=null, relatedModelId=null){
     .then(data => {
 
         let name
-        console.log('data')
         console.log(data)
-        for(const obj of data){
-
+        data.forEach(obj => {
+            console.log('obj')
+            console.log(obj)
             name = obj.name
+            // console.log('coordinates', obj.coordinates)
+            
             let polygon = new google.maps.Polygon({
                 paths: obj.coordinates,
                 strokeOpacity: 0,
@@ -211,8 +213,8 @@ function drawPolygons(prevClickedPolygon=null, model=null, relatedModelId=null){
                 },
                 subPolygons: [],
                 prevClickedPolygon: prevClickedPolygon,
-                isLastLayer: false
-
+                isLastLayer: false,
+                
             })
 
             polygon.setOptions({
@@ -221,7 +223,7 @@ function drawPolygons(prevClickedPolygon=null, model=null, relatedModelId=null){
                 strokeWeight: 1.2,
             })
             
-        
+            console.log(`polygon.id ${polygon.id}`)
             polygon.addListener('mouseover', () =>{
         
                 polygon.setOptions({
@@ -286,12 +288,20 @@ function drawPolygons(prevClickedPolygon=null, model=null, relatedModelId=null){
             if(prevClickedPolygon != null){
                 if(prevClickedPolygon.layerLevel < polygon.layerLevel) prevClickedPolygon.subPolygons.push(polygon)
 
-            } 
-        }
-
+            }
+        })
+    
     })
     .catch(err => console.log(err))
 
 
+
+
 }
+
+
+
+
+
+
 

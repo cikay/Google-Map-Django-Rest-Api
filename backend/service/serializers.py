@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 from .models import (
     Coordinate,
-    Polygon,
     Region,
     City,
     County,
@@ -16,8 +15,9 @@ class CoordinateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coordinate
         fields = (
+            'id',
             'lat',
-            'lng'
+            'lng',
         )
        
 class RegionSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class RegionSerializer(serializers.ModelSerializer):
             'id',
             'model',
             'name',
-            'coordinates'
+            'coordinates',
         )
     
     def get_model(self, instance):
@@ -48,7 +48,7 @@ class CitySerializer(serializers.ModelSerializer):
             'model',
             'name',
             'region',
-            'coordinates'
+            'coordinates',
         )
 
     def get_model(self, instance):
@@ -59,6 +59,7 @@ class CitySerializer(serializers.ModelSerializer):
 
 
 class CountySerializer(serializers.ModelSerializer):
+    coordinates = CoordinateSerializer(many=True)
     model = serializers.SerializerMethodField()
     class Meta: 
         model = County
@@ -67,7 +68,7 @@ class CountySerializer(serializers.ModelSerializer):
             'model',
             'name',
             'coordinates',
-            'city'
+            'city',
         )
 
     def get_model(self, instance):
@@ -78,6 +79,7 @@ class CountySerializer(serializers.ModelSerializer):
 
 
 class NeighborhoodSerializer(serializers.ModelSerializer):
+    coordinates = CoordinateSerializer(many=True)
     model = serializers.SerializerMethodField()
     class Meta: 
         model = Neighborhood
@@ -85,8 +87,8 @@ class NeighborhoodSerializer(serializers.ModelSerializer):
             'id',
             'model',
             'name',
-            'coordinates'
-            'county'
+            'coordinates',
+            'county',
         )
 
     def get_model(self, instance):
