@@ -194,8 +194,6 @@ function drawPolygons(prevClickedPolygon=null, model=null, relatedModelId=null){
             console.log('obj')
             console.log(obj)
             name = obj.name
-            // console.log('coordinates', obj.coordinates)
-            
             let polygon = new google.maps.Polygon({
                 paths: obj.coordinates,
                 strokeOpacity: 0,
