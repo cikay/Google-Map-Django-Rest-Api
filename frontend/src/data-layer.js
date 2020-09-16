@@ -44,109 +44,52 @@ function makeDarkPolygon(polygon){
     }))
     polygon.addListener('mouseout', () => polygon.setOptions(options))
 
+    console.log('makeDarkPOlygon', polygon)
 
 }
 
 
-function resetSubPolygons(childPolygons){
+// function resetChildPolygons(childPolygons){
 
-    let options = {
-        strokeOpacity: 0,
-        strokeWeight: 0,
-        fillOpacity: 0,
-    }
+//     let options = {
+//         strokeOpacity: 0,
+//         strokeWeight: 0,
+//         fillOpacity: 0,
+//     }
+//     console.log('childPolygonssss', childPolygons)
+//     for(let polygon of childPolygons){
+//         console.log('childddddddddddddddddddddddpolygon', polygon)
+//         polygon.setOptions(options)
+//         polygon.addListener('mouseover', () => polygon.setOptions(options))
+//         polygon.addListener('mouseout', () => polygon.setOptions(options))
+//     }
 
-    for(const poly of childPolygons){
-        poly.setOptions(options)
-        poly.addListener('mouseover', () => poly.setOptions(options))
-        poly.addListener('mouseout', () => poly.setOptions(options))
-    }
-
-}
+// }
 
 //if clicked polygon layer level is equal to previous then set previous clicked polygon options
-function setPrevClickedPolygon(clickedPolygon, prevClickedPolygon){
 
-    if(clickedPolygon.layerLevel == prevClickedPolygon.layerLevel)  makeDarkPolygon(prevClickedPolygon)
-   
-    
-}
+function makeDeactive(clickedPolygon, prevClickedPolygon){
 
-
-function setPolygons(clickedPolygon, prevClickedPolygon) {
-
-    resetClickedPolygon(clickedPolygon)
-   
-    // for(let polygon of polygonList){
-
-    //     makeDarkPolygon(polygon)
-         
-    // }
-   
-
+    clickedPolygon.setOptions({clickable: false, visible: false})
     if(prevClickedPolygon != null){
-        console.log('clicked polygon', clickedPolygon)
-        console.log('prevclicked polygon', prevClickedPolygon)
-        console.log('prevClickedPolygon sub polygons', prevClickedPolygon.childPolygons)
-        let options = {
-            strokeOpacity: 1,
-            strokeWeight: 1.2,
-            fillOpacity: 0.3,
-            fillColor: '#000000',
+        console.log('deactive func')
+        if(clickedPolygon.layerLevel <= prevClickedPolygon.layerLevel){
+
+            for(let polygon of prevClickedPolygon.childPolygons){
+
+                polygon.setOptions({clickable: false, visible: false})
+                
+            
+            }
+            prevClickedPolygon.setOptions({clickable: true, visible: true})
+            console.log('deactive', prevClickedPolygon)
 
         }
-        for(let polygon of prevClickedPolygon.childPolygons){
-
-            if(polygon === clickedPolygon) continue
-
-           polygon.setOptions(options)
-           polygon.addListener('mouseout', () => polygon.setOptions(options))
-           
-
-        } 
-        
     }
-
-    else if(prevClickedPolygon != null) {
-        resetSubPolygons(prevClickedPolygon.childPolygons)
-        setPrevClickedPolygon(clickedPolygon, prevClickedPolygon)
-            
-    }
-
 }
 
 
-function resetClickedPolygon(polygon){
 
-
-    if(polygon == null) return
-    console.log(`in reset func ${polygon.model}`)
-    let options = {
-        strokeOpacity: 1,
-        strokeWeight: 0,
-        fillOpacity: 0,
-    }
-
-    polygon.setOptions(options)
-    polygon.addListener('mouseout', () => polygon.setOptions(options))
-    polygon.addListener('mouseover', () => polygon.setOptions(options))
-    console.log('polygon reseted')
-}
-
-function setPolygonMouseOver(polygon){
-
-    polygon.addListener('mouseover', () => {
-
-        polygon.setOptions({
-            strokeColor: '#000000',
-            strokeOpacity: 1,
-            strokeWeight: 1.2,
-            fillOpacity: 0.3,
-            fillColor: '#00ff00',
-        })
-
-    })
-}
 
 function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
 
@@ -166,7 +109,6 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
         console.log('path is undefined')
         return
     }
-    console.log(`prevClickedPolygon: ${prevClickedPolygon}, model: ${model}, `)
     
     fetch(`http://127.0.0.1:8000/service/${path}`)
     .then(res => res.json())
@@ -175,7 +117,7 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
         let name
         
 
-        console.log(data)
+       
         let polygonsInClickedPolygon = []
         data.forEach(obj => {
             name = obj.name
@@ -215,11 +157,11 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
                 layerLevel: layerLevel,
                 zoomLevel: zoomLevel,
                 childPolygons: [],
-                isLastLayer: false, /*obj.model === 'Neighborhood' ? true : false,*/
+                isLastLayer: obj.model === 'Neighborhood' ? true : false,
                 model: obj.model
                 
             })
-            console.log('polygon', polygon)
+            
 
             
             polygon.addListener('mouseover', () =>{
@@ -250,7 +192,7 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
                 let bounds = new google.maps.LatLngBounds()
               
                 for(let coordinate of obj.coordinates) bounds.extend(coordinate)
-                console.log(`center: ${bounds.getCenter()}`)
+                
                 map.setOptions({
                     zoom: polygon.zoomLevel,
                     center: bounds.getCenter()
@@ -258,7 +200,8 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
                
                 if(!polygon.isLastLayer) makeDarkPolygon(polygon)
 
-                setPolygons(polygon, prevClickedPolygon)
+                // setPolygons(polygon, prevClickedPolygon)
+                makeDeactive(polygon, prevClickedPolygon)
 
                 clickedPolygons.push(polygon)
 
@@ -278,8 +221,6 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
        
     })
     .catch(err => console.log(err))
-
-
 }
 
 
