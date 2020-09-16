@@ -191,6 +191,10 @@ class NeighborhoodList(ListAPIView):
 class NeighborhoodDetail(APIView):
 
     def post(self, request):
+        name = request.data.get('name')
+        exist = Neighborhood.objects.filter(name=name).exists()
+        print(f"exist: {exist}")
+        if exist: return Response()
         county = County.objects.get(name=request.data['related_model_name'])
         try:
             neighborhood = Neighborhood.objects.create(name=request.data.get('name'), county=county)

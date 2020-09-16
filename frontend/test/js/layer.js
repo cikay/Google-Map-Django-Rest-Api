@@ -170,6 +170,8 @@ function drawPolygons(prevClickedPolygon=null, model=null, relatedModelId=null){
 
     let path
     console.log(`model: ${model}`)
+
+    if(prevClickedPolygon != null && prevClickedPolygon.isLastLayer == true) return
     if(model === null){
        
         path = 'region/'
@@ -189,45 +191,58 @@ function drawPolygons(prevClickedPolygon=null, model=null, relatedModelId=null){
     .then(data => {
 
         let name
+        
+
         console.log(data)
         data.forEach(obj => {
-            console.log('obj')
-            console.log(obj)
             name = obj.name
+            let clickedPolygonModel
+            switch(obj.model){
+                case 'Region':
+                    clickedPolygonModel = 'city'
+                    layerLevel = 1
+                    zoomLevel = 6.5
+                    break
+                case 'City':
+                    clickedPolygonModel = 'county'
+                    layerLevel = 2
+                    zoomLevel = 7.5
+                    break
+                case 'County':
+                    clickedPolygonModel = 'neighborhood'
+                    layerLevel = 3
+                    zoomLevel = 8.5
+                    break
+                case 'Neighborhood':
+                    clickedPolygonModel = ''
+                    layerLevel = 4
+                    zoomLevel = 9.5
+                    break
+            }
+            console.log(`obj.model: ${obj.model} id: ${obj.id} name: ${name}`)
+
             let polygon = new google.maps.Polygon({
                 paths: obj.coordinates,
-                strokeOpacity: 0,
-                strokeWeight: 0,
-                fillOpacity: 0,
-                name: name,
-                id: obj.id,
-                layerLevel: layerCounter,
-                zoomLevel: () =>{
-
-                    if(prevClickedPolygon==null) return 6.5
-                    let zoomLevel = prevClickedPolygon.zoomLevel()
-                    return prevClickedPolygon.layerLevel < polygon.layerLevel ? zoomLevel += 1 : zoomLevel
-
-                },
-                subPolygons: [],
-                prevClickedPolygon: prevClickedPolygon,
-                isLastLayer: false,
-                
-            })
-
-            polygon.setOptions({
                 strokeColor: '#000000',
                 strokeOpacity: 1,
                 strokeWeight: 1.2,
+                fillOpacity: 0,
+                name: name,
+                id: obj.id,
+                layerLevel: layerLevel,
+                zoomLevel: zoomLevel,
+                subPolygons: [],
+                prevClickedPolygon: prevClickedPolygon,
+                isLastLayer: obj.model === 'Neighborhood' ? true : false,
+                model: obj.model
+                
             })
+           
+
             
-            console.log(`polygon.id ${polygon.id}`)
             polygon.addListener('mouseover', () =>{
         
                 polygon.setOptions({
-                    strokeColor: '#000000',
-                    strokeOpacity: 1,
-                    strokeWeight: 1.2,
                     fillOpacity: 0.3,
                     fillColor: '#00ff00',
                 })
@@ -246,33 +261,19 @@ function drawPolygons(prevClickedPolygon=null, model=null, relatedModelId=null){
             polygon.addListener('click', () =>{
 
                 let prevClickedPolygon = clickedPolygons.pop()
-                let model 
-                switch(obj.model){
-                    
-                    case 'Region':
-                        model = 'city'
-                        break
-                    case 'City':
-                        model = 'county'
-                        break
-                    case 'County':
-                        model = 'neighborhood'
-                        break
-                }
-
-                drawPolygons(prevClickedPolygon, model, polygon.id)
+                
+              
+                drawPolygons(prevClickedPolygon, clickedPolygonModel, polygon.id)
 
                 let bounds = new google.maps.LatLngBounds()
-                console.log(obj)
-                console.log('obj')
+              
                 for(let coordinate of obj.coordinates) bounds.extend(coordinate)
                 console.log(`center: ${bounds.getCenter()}`)
                 map.setOptions({
-                    zoom: polygon.zoomLevel(),
+                    zoom: polygon.zoomLevel,
                     center: bounds.getCenter()
                 })
-        
-            
+               
                 if(!polygon.isLastLayer) makeDarkPolygon(polygon)
 
                 setPolygons(polygonList, polygon, prevClickedPolygon)
@@ -296,6 +297,7 @@ function drawPolygons(prevClickedPolygon=null, model=null, relatedModelId=null){
 
 
 }
+
 
 
 
