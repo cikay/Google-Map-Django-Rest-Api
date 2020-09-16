@@ -79,11 +79,18 @@ function makeDeactive(clickedPolygon, prevClickedPolygon){
 
                 polygon.setOptions({clickable: false, visible: false})
                 
-            
             }
             prevClickedPolygon.setOptions({clickable: true, visible: true})
             console.log('deactive', prevClickedPolygon)
 
+        }
+    }
+    if(clickedPolygon.childPolygons.length){
+        console.log('clicked polygon has child polygons')
+        for(let polygon of clickedPolygon.childPolygons){
+
+            polygon.setOptions({clickable: true, visible: true})
+            
         }
     }
 }
@@ -109,6 +116,12 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
         console.log('path is undefined')
         return
     }
+
+    if(clickedPolygon !== null && clickedPolygon.childPolygons.length){
+        console.log('cagri yapmaya gerek yok', clickedPolygon)
+        makeDeactive(clickedPolygon, prevClickedPolygon)
+        return 
+    }
     
     fetch(`http://127.0.0.1:8000/service/${path}`)
     .then(res => res.json())
@@ -116,9 +129,6 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
 
         let name
         
-
-       
-        let polygonsInClickedPolygon = []
         data.forEach(obj => {
             name = obj.name
             let clickedPolygonModel
@@ -200,7 +210,6 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
                
                 if(!polygon.isLastLayer) makeDarkPolygon(polygon)
 
-                // setPolygons(polygon, prevClickedPolygon)
                 makeDeactive(polygon, prevClickedPolygon)
 
                 clickedPolygons.push(polygon)
