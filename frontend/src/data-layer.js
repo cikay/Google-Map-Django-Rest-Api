@@ -25,7 +25,7 @@ function initMap(){
 
 
 
-function makeDarkPolygon(polygon){
+function makeDarkPolygon(clickedPolygon){
 
     let options = {
         strokeOpacity: 1,
@@ -33,46 +33,27 @@ function makeDarkPolygon(polygon){
         fillOpacity: 0.3,
         fillColor: '#000000',
     }
-    polygon.setOptions(options)
-    
-    polygon.addListener('mouseover', () => polygon.setOptions({
-        strokeColor: '#000000',
-        strokeOpacity: 1,
-        strokeWeight: 1.2,
-        fillOpacity: 0.3,
-        fillColor: '#00ff00',
-    }))
-    polygon.addListener('mouseout', () => polygon.setOptions(options))
 
-    console.log('makeDarkPOlygon', polygon)
+    if(clickedPolygon.parentPolygon != null){
+        console.log(clickedPolygon.parentPolygon)
+        for(let polygon of clickedPolygon.parentPolygon.childPolygons){
+
+            if(polygon === clickedPolygon) continue
+            polygon.setOptions(options)
+            polygon.addListener('mouseout', () => polygon.setOptions(options)) // mouse ayrildiginda tekrar koyulastirilir, polygon ilk olusturuldugunda koyu degil 
+          
+        }
+
+    }
+    
 
 }
 
-
-// function resetChildPolygons(childPolygons){
-
-//     let options = {
-//         strokeOpacity: 0,
-//         strokeWeight: 0,
-//         fillOpacity: 0,
-//     }
-//     console.log('childPolygonssss', childPolygons)
-//     for(let polygon of childPolygons){
-//         console.log('childddddddddddddddddddddddpolygon', polygon)
-//         polygon.setOptions(options)
-//         polygon.addListener('mouseover', () => polygon.setOptions(options))
-//         polygon.addListener('mouseout', () => polygon.setOptions(options))
-//     }
-
-// }
-
-//if clicked polygon layer level is equal to previous then set previous clicked polygon options
 
 function makeDeactive(clickedPolygon, prevClickedPolygon){
 
     clickedPolygon.setOptions({clickable: false, visible: false})
     if(prevClickedPolygon != null){
-        console.log('deactive func')
         if(clickedPolygon.layerLevel <= prevClickedPolygon.layerLevel){
 
             for(let polygon of prevClickedPolygon.childPolygons){
@@ -103,7 +84,11 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
     let path
     console.log(`model: ${model}`)
 
-    if(prevClickedPolygon != null && prevClickedPolygon.isLastLayer == true) return
+    if(clickedPolygon != null && clickedPolygon.isLastLayer == true){
+        console.log('last layer')
+        return
+    }
+
     if(model === null){
        
         path = 'region/'
@@ -118,7 +103,7 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
     }
 
     if(clickedPolygon !== null && clickedPolygon.childPolygons.length){
-        console.log('cagri yapmaya gerek yok', clickedPolygon)
+        console.log('veriler daha once alindigindan servera istek atilmadi.')
         makeDeactive(clickedPolygon, prevClickedPolygon)
         return 
     }
