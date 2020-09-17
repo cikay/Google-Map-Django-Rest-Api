@@ -35,7 +35,7 @@ function makeDarkPolygon(clickedPolygon){
     }
 
     if(clickedPolygon.parentPolygon != null){
-        console.log(clickedPolygon.parentPolygon)
+        
         for(let polygon of clickedPolygon.parentPolygon.childPolygons){
 
             if(polygon === clickedPolygon) continue
@@ -46,34 +46,40 @@ function makeDarkPolygon(clickedPolygon){
 
     }
     
-
 }
 
 
 function makeDeactive(clickedPolygon, prevClickedPolygon){
-
+    
     clickedPolygon.setOptions({clickable: false, visible: false})
     if(prevClickedPolygon != null){
         if(clickedPolygon.layerLevel <= prevClickedPolygon.layerLevel){
+            
+            while(true){
 
-            for(let polygon of prevClickedPolygon.childPolygons){
+                if(prevClickedPolygon.layerLevel < clickedPolygon.layerLevel) break
 
-                polygon.setOptions({clickable: false, visible: false})
-                
+                for(let polygon of prevClickedPolygon.childPolygons){
+
+                    polygon.setOptions({clickable: false, visible: false})
+                    console.log('disabled polygon name:', polygon.name)
+                }
+                prevClickedPolygon.setOptions({clickable: true, visible: true})
+                prevClickedPolygon = prevClickedPolygon.parentPolygon
+
             }
-            prevClickedPolygon.setOptions({clickable: true, visible: true})
-            console.log('deactive', prevClickedPolygon)
 
         }
     }
-    if(clickedPolygon.childPolygons.length){
-        console.log('clicked polygon has child polygons')
+    
+    if(clickedPolygon.earlierCreatedChildPolygons){
         for(let polygon of clickedPolygon.childPolygons){
 
             polygon.setOptions({clickable: true, visible: true})
             
         }
     }
+
 }
 
 
@@ -83,7 +89,6 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
 
     let path
     console.log(`model: ${model}`)
-
     if(clickedPolygon != null && clickedPolygon.isLastLayer == true){
         console.log('last layer')
         return
@@ -95,16 +100,17 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
     }
     else if(model !== null && clickedPolygon !== null ){
         path = `${model}/get/${clickedPolygon.id}/`
+        
     }
-    if(path === undefined) {
+    if(path === null) {
        
         console.log('path is undefined')
         return
     }
 
     if(clickedPolygon !== null && clickedPolygon.childPolygons.length){
-        console.log('veriler daha once alindigindan servera istek atilmadi.')
-        makeDeactive(clickedPolygon, prevClickedPolygon)
+        console.log('Earlier created child polygons of clicked polygon, no need to make http request.')
+        clickedPolygon.setOptions({earlierCreatedChildPolygons: true})
         return 
     }
     
@@ -112,8 +118,13 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
     .then(res => res.json())
     .then(data => {
 
+        if(data.length === 0){
+            
+            return
+        }
+
         let name
-        
+        console.log(data)
         data.forEach(obj => {
             name = obj.name
             let clickedPolygonModel
@@ -136,7 +147,7 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
                 case 'Neighborhood':
                     clickedPolygonModel = ''
                     layerLevel = 4
-                    zoomLevel = 9.5
+                    zoomLevel = 15
                     break
             }
            
@@ -153,7 +164,9 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
                 zoomLevel: zoomLevel,
                 childPolygons: [],
                 isLastLayer: obj.model === 'Neighborhood' ? true : false,
-                model: obj.model
+                model: obj.model,
+                earlierCreatedChildPolygons: false,
+
                 
             })
             
@@ -196,14 +209,13 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
                 if(!polygon.isLastLayer) makeDarkPolygon(polygon)
 
                 makeDeactive(polygon, prevClickedPolygon)
-
                 clickedPolygons.push(polygon)
 
             })
 
-
+            
             polygon.setMap(map)
-           
+            
             if(clickedPolygon != null){
                 clickedPolygon.childPolygons.push(polygon)
                 polygon.setOptions({parentPolygon: clickedPolygon})
