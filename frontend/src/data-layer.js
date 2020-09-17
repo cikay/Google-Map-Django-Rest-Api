@@ -50,18 +50,13 @@ function makeDarkPolygon(clickedPolygon){
 
 
 function makeDeactive(clickedPolygon, prevClickedPolygon){
-<<<<<<< HEAD
     
-=======
-    let beforeClickedPolygon = prevClickedPolygon
->>>>>>> d81bb7a951dd9ea95a1fba3deb242d5ad1db42f5
     clickedPolygon.setOptions({clickable: false, visible: false})
     if(prevClickedPolygon != null){
         if(clickedPolygon.layerLevel <= prevClickedPolygon.layerLevel){
             
             while(true){
 
-<<<<<<< HEAD
                 if(prevClickedPolygon.layerLevel < clickedPolygon.layerLevel) break
 
                 for(let polygon of prevClickedPolygon.childPolygons){
@@ -72,19 +67,6 @@ function makeDeactive(clickedPolygon, prevClickedPolygon){
                 prevClickedPolygon.setOptions({clickable: true, visible: true})
                 prevClickedPolygon = prevClickedPolygon.parentPolygon
 
-=======
-                for(let polygon of prevClickedPolygon.childPolygons){
-
-                    polygon.setOptions({clickable: false, visible: false})
-                    
-                }
-                prevClickedPolygon.setOptions({clickable: true, visible: true})
-
-                if(prevClickedPolygon.layerLevel <= clickedPolygon.layerLevel) break
-                
-                prevClickedPolygon = prevClickedPolygon.parentPolygon
-
->>>>>>> d81bb7a951dd9ea95a1fba3deb242d5ad1db42f5
             }
 
         }
@@ -109,10 +91,6 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
 
     let path
     console.log(`model: ${model}`)
-<<<<<<< HEAD
-=======
-    console.log('clickedpolygon, ', clickedPolygon)
->>>>>>> d81bb7a951dd9ea95a1fba3deb242d5ad1db42f5
     if(clickedPolygon != null && clickedPolygon.isLastLayer == true){
         console.log('last layer')
         return
@@ -135,10 +113,6 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
     if(clickedPolygon !== null && clickedPolygon.childPolygons.length){
         console.log('Earlier created child polygons of clicked polygon, no need to make http request.')
         clickedPolygon.setOptions({earlierCreatedChildPolygons: true})
-<<<<<<< HEAD
-=======
-        // makeDeactive(clickedPolygon, prevClickedPolygon)
->>>>>>> d81bb7a951dd9ea95a1fba3deb242d5ad1db42f5
         return 
     }
     
