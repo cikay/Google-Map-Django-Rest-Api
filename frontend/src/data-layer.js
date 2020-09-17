@@ -91,10 +91,7 @@ function makeDeactive(clickedPolygon, prevClickedPolygon){
     }
     
     if(clickedPolygon.earlierCreatedChildPolygons){
-<<<<<<< HEAD
-=======
         console.log('clicked polygon has child polygons')
->>>>>>> d81bb7a951dd9ea95a1fba3deb242d5ad1db42f5
         for(let polygon of clickedPolygon.childPolygons){
 
             polygon.setOptions({clickable: true, visible: true})
