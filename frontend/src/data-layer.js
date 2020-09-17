@@ -35,7 +35,7 @@ function makeDarkPolygon(clickedPolygon){
     }
 
     if(clickedPolygon.parentPolygon != null){
-        console.log(clickedPolygon.parentPolygon)
+        
         for(let polygon of clickedPolygon.parentPolygon.childPolygons){
 
             if(polygon === clickedPolygon) continue
@@ -46,34 +46,43 @@ function makeDarkPolygon(clickedPolygon){
 
     }
     
-
 }
 
 
 function makeDeactive(clickedPolygon, prevClickedPolygon){
-
+    let beforeClickedPolygon = prevClickedPolygon
     clickedPolygon.setOptions({clickable: false, visible: false})
     if(prevClickedPolygon != null){
         if(clickedPolygon.layerLevel <= prevClickedPolygon.layerLevel){
+            
+            while(true){
 
-            for(let polygon of prevClickedPolygon.childPolygons){
+                for(let polygon of prevClickedPolygon.childPolygons){
 
-                polygon.setOptions({clickable: false, visible: false})
+                    polygon.setOptions({clickable: false, visible: false})
+                    
+                }
+                prevClickedPolygon.setOptions({clickable: true, visible: true})
+
+                if(prevClickedPolygon.layerLevel <= clickedPolygon.layerLevel) break
                 
+                prevClickedPolygon = prevClickedPolygon.parentPolygon
+
             }
-            prevClickedPolygon.setOptions({clickable: true, visible: true})
-            console.log('deactive', prevClickedPolygon)
 
         }
     }
-    if(clickedPolygon.childPolygons.length){
+    
+    if(clickedPolygon.earlierCreatedChildPolygons){
         console.log('clicked polygon has child polygons')
         for(let polygon of clickedPolygon.childPolygons){
 
             polygon.setOptions({clickable: true, visible: true})
             
         }
+        console.log('neden iki kez')
     }
+
 }
 
 
@@ -83,7 +92,7 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
 
     let path
     console.log(`model: ${model}`)
-
+    console.log('clickedpolygon, ', clickedPolygon)
     if(clickedPolygon != null && clickedPolygon.isLastLayer == true){
         console.log('last layer')
         return
@@ -96,15 +105,16 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
     else if(model !== null && clickedPolygon !== null ){
         path = `${model}/get/${clickedPolygon.id}/`
     }
-    if(path === undefined) {
+    if(path === null) {
        
         console.log('path is undefined')
         return
     }
 
     if(clickedPolygon !== null && clickedPolygon.childPolygons.length){
-        console.log('veriler daha once alindigindan servera istek atilmadi.')
-        makeDeactive(clickedPolygon, prevClickedPolygon)
+        console.log('Earlier created child polygons of clicked polygon, no need to make http request.')
+        clickedPolygon.setOptions({earlierCreatedChildPolygons: true})
+        // makeDeactive(clickedPolygon, prevClickedPolygon)
         return 
     }
     
@@ -112,8 +122,13 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
     .then(res => res.json())
     .then(data => {
 
+        if(data.length === 0){
+            
+            return
+        }
+
         let name
-        
+        console.log(data)
         data.forEach(obj => {
             name = obj.name
             let clickedPolygonModel
@@ -153,7 +168,9 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
                 zoomLevel: zoomLevel,
                 childPolygons: [],
                 isLastLayer: obj.model === 'Neighborhood' ? true : false,
-                model: obj.model
+                model: obj.model,
+                earlierCreatedChildPolygons: false,
+
                 
             })
             
@@ -196,7 +213,6 @@ function drawPolygons(prevClickedPolygon=null, clickedPolygon=null, model=null){
                 if(!polygon.isLastLayer) makeDarkPolygon(polygon)
 
                 makeDeactive(polygon, prevClickedPolygon)
-
                 clickedPolygons.push(polygon)
 
             })
